@@ -1,6 +1,6 @@
 // Users
 const db = require("../config");
-const { hash, compare, hasSync } = require("brypt");
+const { hash, compare, hasSync } = require("bcrypt");
 // Hash function allows us to encrypt the password.
 // Compare function is similar to a IF statement.
 // salt is for password. Minimum letters is 10 but can be changed
@@ -10,7 +10,7 @@ const { createToken } = require("../middleware/AuthenticateUser");
 class Users {
   fetchUsers(req, res) {
     const query = `
-        SELECT userID, firstName, lastNmae, gender, userDOB, emailAdd, profileUrl
+        SELECT userID, firstName, lastName, gender, userDOB, emailAdd, profileUrl
         FROM Users;
         `;
     db.query(query, (err, results) => {
@@ -22,13 +22,14 @@ class Users {
     });
   }
   fetchUser(req, res) {
+    const id = req.params.id
     const query = `
-        SELECT userID, firstName, lastNmae, gender, userDOB, emailAdd, profileUrl
+        SELECT userID, firstName, lastName, gender, userDOB, emailAdd, profileUrl
         FROM Users
-        WHERE userID = ?;
+        WHERE userID = ?
         `;
     // OR WHERE userID = ${req.params.id};
-    db.query(query, (err, result) => {
+    db.query(query, [id], (err, result) => {
       if (err) throw err;
       res.json({
         status: res.statusCode,
@@ -36,15 +37,56 @@ class Users {
       });
     });
   }
+
   login(req, res) {
+    const { emailAdd, userPass } = req.body;
+    // query
     const query = `
-        `;
-    // come back to this
+    SELECT firstName, lastName,
+    gender, userDOB, emailAdd, userPass,
+    profileUrl
+    FROM Users
+    WHERE emailAdd = ?;
+    `;
+    db.query(query,[emailAdd],async (err, result) => {
+      if (err) throw err;
+      if (!result?.length) {
+        res.json({
+          status: res.statusCode,
+          msg: "You provided a wrong email.",
+        });
+      } else {
+      await compare(userPass, result[0].userPass, (Err, Result) => {
+          if (Err) throw Err;
+          // Create a token
+          const token = createToken({
+            emailAdd,
+            userPass,
+          });
+          // Save a token
+          res.cookie("LegitUser", token, {
+            maxAge: 3600000,
+            httpOnly: true,
+          });
+          if (Result) {
+            res.json({
+              msg: "Logged in",
+              token,
+              result: result[0],
+            });
+          } else {
+            res.json({
+              status: res.statusCode,
+              msg: "Invalid password or you have not registered",
+            });
+          }
+        });
+      }
+    });
   }
 
-
-//   async allows us to run multiple lines at the same time
-//   it doesnt wait for tasks to be completed. Eg, if task one isnt complete, task 2 will already be rendering.
+  //   async allows us to run multiple lines at the same time
+  //   it doesnt wait for tasks to be completed. Eg, if task one isnt complete, task 2 will already be rendering.
   async register(req, res) {
     const data = req.body;
     // Encrypt password
@@ -59,19 +101,19 @@ class Users {
         INSERT INTO Users
         SET ?;
         `;
-        // or SET can be changed to 'VALUES(?, ?, ?, ?, ?, ?, ?)
+    // or SET can be changed to 'VALUES(?, ?, ?, ?, ?, ?, ?)
     db.query(query, [data], (err) => {
       if (err) throw err;
-    //   Create token
-    let token = createToken(user)
-    res.cookie('LegitUser', token, {
+      //   Create token
+      let token = createToken(user);
+      res.cookie("LegitUser", token, {
         maxAge: 3600000,
-        httpOnly: true
-    })
-    res.json({
+        httpOnly: true,
+      });
+      res.json({
         status: res.statusCode,
-        msg: "You are now registered."
-    })
+        msg: "You are now registered.",
+      });
     });
   }
 

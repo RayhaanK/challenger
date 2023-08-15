@@ -1,6 +1,5 @@
 // Orders
 
-class Orders{
-
+class Orders {
 }
-module.exports = Orders
+module.exports = Orders;
