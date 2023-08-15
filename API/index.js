@@ -1,6 +1,7 @@
 const {express, routes} = require('./Controller')
 const app = express()
 const port = +process.env.PORT || 3000
+const path = require('path')
 
 // we need to allow them to use static folder
 app.use(express.static('./static'))
@@ -15,5 +16,5 @@ routes.get('^/$|/challenger', (req, res)=>{
 })
 
 app.listen(port, ()=>{
-    console.log(`The server is runnong on port ${port}`);
+    console.log(`The server is running on port ${port}`);
 })

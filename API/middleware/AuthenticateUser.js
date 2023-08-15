@@ -1,16 +1,16 @@
 // Authentication
 const {sign, veryify} = require('jsonwebtoken')
 // Two methods to get a token.^^
-require('dontenv').config()
+require('dotenv').config()
 
-function createUser(user) {
+function createToken(user) {
     return sign({
         emailAdd: user.emailAdd,
         userPass: user.userPass
     },
     process.env.SECRET_KEY,
     {
-        expiresOn: '1h'
+        expiresIn: '1h'
     }
     )
 }
