@@ -16,10 +16,23 @@ function createToken(user) {
 }
 
 function verifyAToken(req, res, next) {
-    const token = req.headers["authorization"]
+    // To prevent undefined error, place?, before your property
+    try {
+        // Retrieve token from req.headers
+        console.log("Get token from req.header['authorization");
+        const token = req.headers["authorization"]
+        console.log(token);
+        next()
+    } catch(e) {
+        res.json({
+            status: res.statusCode,
+            msg: e.message
+        })
+    }
     
 }
 
 module.exports = {
-    createToken
+    createToken,
+    verifyAToken
 }

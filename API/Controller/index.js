@@ -1,6 +1,7 @@
 // Controller
 const express = require('express')
 const bodyParser = require('body-parser')
+const {verrifyAToken} = require('../middleware/AuthenticateUser')
 // router allows us to create a dynamic router
 const routes = express.Router()
 // Import all model's objects
@@ -77,4 +78,5 @@ routes.patch('/author/:id', bodyParser.json(), (req, res)=>{
 module.exports = {
     express,
     routes,
+    verrifyAToken
 }
