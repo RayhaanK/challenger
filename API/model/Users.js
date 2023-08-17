@@ -85,6 +85,61 @@ class Users {
     });
   }
 
+  // OR FOR LOGIN
+//   login(req, res) {
+//     const {emailAdd, userPass} = req.body
+//     // query
+//     const query = `
+//     SELECT firstName, lastName,
+//     gender, userDOB, emailAdd, userPass,
+//     profileUrl
+//     FROM Users
+//     WHERE emailAdd = '${emailAdd}';
+// have to add the the single quotation
+
+//     `
+//     db.query(query, async (err, result)=>{
+//         if(err) throw err
+//         if(!result?.length){
+//             res.json({
+//                 status: res.statusCode,
+//                 msg: "You provided a wrong email."
+//             })
+//         }else {
+//             await compare(userPass,
+//                 result[0].userPass,
+//                 (cErr, cResult)=>{
+//                     if(cErr) throw cErr
+//                     // Create a token
+//                     const token =
+//                     createToken({
+//                         emailAdd,
+//                         userPass
+//                     })
+//                     // Save a token
+//                     res.cookie("LegitUser",
+//                     token, {
+//                         maxAge: 3600000,
+//                         httpOnly: true
+//                     })
+//                     if(cResult) {
+//                         res.json({
+//                             msg: "Logged in",
+//                             token,
+//                             result: result[0]
+//                         })
+//                     }else {
+//                         res.json({
+//                             status: res.statusCode,
+//                             msg:
+//                             "Invalid password or you have not registered"
+//                         })
+//                     }
+//                 })
+//         }
+//     })
+// }
+
   //   async allows us to run multiple lines at the same time
   //   it doesnt wait for tasks to be completed. Eg, if task one isnt complete, task 2 will already be rendering.
   async register(req, res) {
@@ -118,6 +173,11 @@ class Users {
   }
 
   updateUser(req, res) {
+    const data = rew.body
+    if(data.userPass) {
+      data.userPass = hasSync(data.userPass, 15)
+    }
+    // To encrypt password^
     const query = `
         UPDATE FROM Users
         SET ?
